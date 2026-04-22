@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Confirmed — TasteBueno</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Taste<span>Bueno</span></a>
+  </div>
+</header>
+<div class="result-page">
+  <div class="result-card">
+    <div class="result-icon success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+    </div>
+    <h1>Order Confirmed!</h1>
+    <p>You'll receive a confirmation email shortly. We'll print your order and ship it within 24 hours. Questions? Email us at <a href="mailto:hello@tastebueno.com" style="color:var(--red);font-weight:600;">hello@tastebueno.com</a></p>
+    <div class="result-actions">
+      <a href="/shop.html" class="btn btn-primary">Continue Shopping</a>
+      <a href="/" class="btn btn-outline">Back to Home</a>
+    </div>
+  </div>
+</div>
+<script>
+  // Clear cart on successful order
+  localStorage.removeItem('tb_cart');
+</script>
+</body>
+</html>

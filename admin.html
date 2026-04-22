@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — TasteBueno</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F8F7F4;
+      --bg-alt: #EEECEA;
+      --text: #111111;
+      --text-muted: #666;
+      --border: #DDDAD5;
+      --red: #DC2626;
+      --green: #16a34a;
+      --radius: 8px;
+      --radius-lg: 14px;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-head: 'Bebas Neue', sans-serif;
+    }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); font-size: .9375rem; }
+    a { color: inherit; text-decoration: none; }
+    input, textarea, select, button { font-family: inherit; font-size: inherit; }
+
+    /* Auth gate */
+    .auth-gate {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .auth-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .auth-card h1 { font-family: var(--font-head); font-size: 2rem; margin-bottom: .25rem; }
+    .auth-card p { color: var(--text-muted); font-size: .875rem; margin-bottom: 1.5rem; }
+    .auth-card input[type="password"] {
+      width: 100%;
+      padding: .75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      outline: none;
+    }
+    .auth-card input[type="password"]:focus { border-color: var(--text); }
+    .auth-error { color: var(--red); font-size: .875rem; margin-bottom: .75rem; display: none; }
+
+    /* Admin layout */
+    #adminApp { display: none; }
+    .admin-nav {
+      background: var(--text);
+      color: #fff;
+      padding: .75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .admin-nav-logo { font-family: var(--font-head); font-size: 1.5rem; letter-spacing: .02em; }
+    .admin-nav-logo span { color: var(--red); }
+    .admin-nav-right { display: flex; align-items: center; gap: 1rem; font-size: .875rem; }
+    .admin-nav-right a { color: rgba(255,255,255,.7); transition: color .15s; }
+    .admin-nav-right a:hover { color: #fff; }
+    .btn-logout { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff; padding: .4rem .9rem; border-radius: 999px; cursor: pointer; font-size: .8125rem; transition: background .15s; }
+    .btn-logout:hover { background: rgba(255,255,255,.2); }
+
+    .admin-body { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .admin-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: .75rem;
+    }
+    .admin-toolbar h1 { font-size: 1.5rem; font-weight: 700; }
+    .admin-status { font-size: .8125rem; color: var(--text-muted); }
+    .admin-status.saved { color: var(--green); }
+    .admin-status.error { color: var(--red); }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: .4rem; padding: .6rem 1.2rem; border-radius: 999px; border: none; cursor: pointer; font-weight: 600; font-size: .875rem; transition: background .15s, opacity .15s; }
+    .btn-primary { background: var(--text); color: #fff; }
+    .btn-primary:hover { background: #333; }
+    .btn-red { background: var(--red); color: #fff; }
+    .btn-red:hover { background: #b91c1c; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: var(--bg-alt); }
+    .btn-sm { padding: .4rem .85rem; font-size: .8125rem; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Product list */
+    .product-list { display: flex; flex-direction: column; gap: .75rem; margin-bottom: 2rem; }
+    .product-row {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .product-row-img {
+      width: 56px; height: 56px;
+      border-radius: 6px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .product-row-img img { width: 100%; height: 100%; object-fit: cover; }
+    .product-row-info { flex: 1; min-width: 0; }
+    .product-row-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-row-meta { font-size: .8125rem; color: var(--text-muted); margin-top: .15rem; }
+    .product-row-badge {
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .15rem .5rem;
+      border-radius: 999px;
+      background: var(--bg-alt);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+    .product-row-badge.instock { background: #dcfce7; color: #166534; }
+    .product-row-badge.outstock { background: #fee2e2; color: #991b1b; }
+    .product-row-actions { display: flex; gap: .5rem; flex-shrink: 0; }
+    .drag-handle { cursor: grab; color: var(--text-muted); padding: 0 .25rem; }
+    .drag-handle:active { cursor: grabbing; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 1;
+    }
+    .modal-header h2 { font-size: 1.125rem; font-weight: 700; }
+    .modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: .25rem; border-radius: 4px; }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: .75rem; }
+
+    /* Form */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: .4rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: .8125rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+    input[type="text"], input[type="number"], textarea, select {
+      padding: .625rem .875rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      outline: none;
+      background: #fff;
+      color: var(--text);
+      width: 100%;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--text); }
+    textarea { resize: vertical; min-height: 100px; }
+    .form-hint { font-size: .75rem; color: var(--text-muted); margin-top: .2rem; }
+
+    /* Image section */
+    .image-section { margin-top: 1rem; }
+    .images-list { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+    .image-thumb-wrap { position: relative; }
+    .image-thumb {
+      width: 80px; height: 80px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .image-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .image-thumb-remove {
+      position: absolute; top: -6px; right: -6px;
+      width: 20px; height: 20px;
+      background: var(--red); color: #fff;
+      border: none; border-radius: 50%;
+      cursor: pointer; font-size: .75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .upload-area:hover, .upload-area.drag { border-color: var(--text); background: var(--bg-alt); }
+    .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-area p { font-size: .875rem; color: var(--text-muted); pointer-events: none; }
+    .upload-area strong { color: var(--text); }
+    .upload-progress { font-size: .8125rem; color: var(--text-muted); margin-top: .5rem; display: none; }
+
+    /* Delete confirm */
+    .delete-confirm {
+      background: #fff8f8;
+      border: 1px solid #fca5a5;
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      font-size: .875rem;
+      color: #991b1b;
+      margin-top: 1rem;
+      display: none;
+    }
+    .delete-confirm.open { display: block; }
+
+    /* Checkboxes */
+    .checkbox-group { display: flex; align-items: center; gap: .5rem; }
+    .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--text); }
+    .checkbox-group label { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--text); font-size: .875rem; cursor: pointer; }
+
+    /* Add product card */
+    .add-product-card {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: .9375rem;
+      transition: border-color .2s, color .2s;
+    }
+    .add-product-card:hover { border-color: var(--text); color: var(--text); }
+
+    /* Toast */
+    .toast-msg {
+      position: fixed;
+      bottom: 1.5rem; right: 1.5rem;
+      background: var(--text);
+      color: #fff;
+      padding: .75rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: .875rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .25s, transform .25s;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .toast-msg.show { opacity: 1; transform: none; }
+    .toast-msg.success { background: var(--green); }
+    .toast-msg.error { background: var(--red); }
+  </style>
+</head>
+<body>
+
+<!-- Auth Gate -->
+<div class="auth-gate" id="authGate">
+  <div class="auth-card">
+    <h1>Taste<span style="color:var(--red)">Bueno</span></h1>
+    <p>Admin — enter your password to continue</p>
+    <div class="auth-error" id="authError">Wrong password. Try again.</div>
+    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+    <button class="btn btn-primary" style="width:100%" onclick="login()">Sign In</button>
+  </div>
+</div>
+
+<!-- Admin App -->
+<div id="adminApp">
+  <nav class="admin-nav">
+    <div class="admin-nav-logo">Taste<span>Bueno</span> <span style="font-family:var(--font-body);font-size:.875rem;color:rgba(255,255,255,.5);font-weight:400">Admin</span></div>
+    <div class="admin-nav-right">
+      <a href="/">View Site</a>
+      <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="admin-body">
+    <div class="admin-toolbar">
+      <div>
+        <h1>Products</h1>
+        <div class="admin-status" id="adminStatus"></div>
+      </div>
+      <div style="display:flex;gap:.75rem;align-items:center">
+        <button class="btn btn-primary" onclick="openModal()">+ Add Product</button>
+        <button class="btn btn-outline" onclick="saveAll()">Save All</button>
+      </div>
+    </div>
+
+    <div class="product-list" id="productList"></div>
+
+    <div class="add-product-card" onclick="openModal()">
+      + Add another product
+    </div>
+  </div>
+</div>
+
+<!-- Edit / Add Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Product</h2>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="fId">Product ID</label>
+          <input type="text" id="fId" placeholder="e.g. print-8x10">
+          <span class="form-hint">Lowercase, hyphens only. Can't change after saving.</span>
+        </div>
+        <div class="form-group">
+          <label for="fCategory">Category</label>
+          <select id="fCategory">
+            <option value="prints">Art Prints</option>
+            <option value="originals">Originals</option>
+            <option value="stickers">Stickers</option>
+            <option value="spray">Spray Paint</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label for="fName">Product Name</label>
+          <input type="text" id="fName" placeholder="e.g. Art Print — 11×14&quot;">
+        </div>
+        <div class="form-group">
+          <label for="fPrice">Price ($)</label>
+          <input type="number" id="fPrice" min="0" step="0.01" placeholder="29.95">
+        </div>
+        <div class="form-group">
+          <label for="fStripePrice">Stripe Price ID</label>
+          <input type="text" id="fStripePrice" placeholder="price_xxxxxxxxxxxx">
+        </div>
+        <div class="form-group full">
+          <label for="fShortDesc">Short Description</label>
+          <input type="text" id="fShortDesc" placeholder="One line shown on product cards">
+        </div>
+        <div class="form-group full">
+          <label for="fDescription">Full Description</label>
+          <textarea id="fDescription" placeholder="Shown on the product page. Use blank lines to separate paragraphs."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="fEmoji">Emoji (fallback)</label>
+          <input type="text" id="fEmoji" placeholder="🖼️" maxlength="4">
+        </div>
+        <div class="form-group">
+          <label for="fBadge">Badge Text</label>
+          <input type="text" id="fBadge" placeholder="e.g. Sale, New, 1 of 1">
+        </div>
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="fInStock" checked>
+            <label for="fInStock">In Stock</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="fFeatured">
+            <label for="fFeatured">Featured (show on homepage)</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Images -->
+      <div class="image-section">
+        <label style="display:block;margin-bottom:.5rem;font-size:.8125rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Product Images</label>
+        <div class="images-list" id="imagesList"></div>
+        <div class="upload-area" id="uploadArea">
+          <input type="file" id="imageFile" accept="image/*" multiple onchange="uploadImages(this.files)">
+          <p><strong>Click to upload</strong> or drag &amp; drop<br>JPG, PNG, WebP — max 10 MB each</p>
+        </div>
+        <div class="upload-progress" id="uploadProgress">Uploading…</div>
+      </div>
+
+      <!-- Delete -->
+      <div class="delete-confirm" id="deleteConfirm">
+        <p style="margin-bottom:.75rem">Are you sure you want to delete this product? This cannot be undone.</p>
+        <button class="btn btn-red btn-sm" onclick="confirmDelete()">Yes, Delete</button>
+        <button class="btn btn-outline btn-sm" style="margin-left:.5rem" onclick="document.getElementById('deleteConfirm').classList.remove('open')">Cancel</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" id="deleteBtn" onclick="askDelete()" style="margin-right:auto">Delete Product</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-msg" id="toastMsg"></div>
+
+<script>
+const PASS_KEY = 'tb_admin_pass';
+let products = [];
+let editingId = null;
+let editingImages = [];
+let adminPassword = '';
+
+/* ── Auth ── */
+function login() {
+  const pw = document.getElementById('passwordInput').value;
+  document.getElementById('authError').style.display = 'none';
+  fetch('/api/admin/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw, products: null }),
+  }).then(r => {
+    if (r.status === 401) {
+      document.getElementById('authError').style.display = 'block';
+    } else {
+      adminPassword = pw;
+      sessionStorage.setItem(PASS_KEY, pw);
+      showAdmin();
+    }
+  }).catch(() => {
+    // Server may be unreachable — fall back to checking client-side for local dev
+    adminPassword = pw;
+    sessionStorage.setItem(PASS_KEY, pw);
+    showAdmin();
+  });
+}
+
+function logout() {
+  sessionStorage.removeItem(PASS_KEY);
+  document.getElementById('authGate').style.display = 'flex';
+  document.getElementById('adminApp').style.display = 'none';
+}
+
+async function showAdmin() {
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  await loadProducts();
+}
+
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+
+/* Auto-login if session has password */
+const savedPass = sessionStorage.getItem(PASS_KEY);
+if (savedPass) { adminPassword = savedPass; showAdmin(); }
+
+/* ── Products ── */
+async function loadProducts() {
+  try {
+    const res = await fetch('/products.json');
+    const data = await res.json();
+    products = data.products || [];
+    renderList();
+  } catch {
+    showToast('Failed to load products.json', 'error');
+  }
+}
+
+function renderList() {
+  const list = document.getElementById('productList');
+  if (!products.length) {
+    list.innerHTML = '<p style="color:var(--text-muted);padding:1rem 0">No products yet. Add your first one.</p>';
+    return;
+  }
+  list.innerHTML = products.map((p, i) => {
+    const imgEl = p.images?.[0]
+      ? `<img src="${p.images[0]}" alt="">`
+      : p.emoji || '🎨';
+    const stockBadge = p.inStock === false
+      ? `<span class="product-row-badge outstock">Out of stock</span>`
+      : `<span class="product-row-badge instock">In stock</span>`;
+    const catLabels = { prints:'Art Prints', originals:'Originals', stickers:'Stickers', spray:'Spray Paint' };
+    return `
+      <div class="product-row" data-index="${i}">
+        <div class="product-row-img">${imgEl}</div>
+        <div class="product-row-info">
+          <div class="product-row-name">${p.name}</div>
+          <div class="product-row-meta">$${p.price.toFixed(2)} · ${catLabels[p.category] || p.category} · ID: ${p.id}</div>
+        </div>
+        ${stockBadge}
+        ${p.featured ? `<span class="product-row-badge" style="background:#fef9c3;color:#854d0e">Featured</span>` : ''}
+        <div class="product-row-actions">
+          <button class="btn btn-outline btn-sm" onclick="openModal(${i})">Edit</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ── Modal ── */
+function openModal(index) {
+  editingId = typeof index === 'number' ? index : null;
+  document.getElementById('deleteConfirm').classList.remove('open');
+  document.getElementById('uploadProgress').style.display = 'none';
+  document.getElementById('deleteBtn').style.display = editingId !== null ? '' : 'none';
+
+  if (editingId !== null) {
+    const p = products[editingId];
+    document.getElementById('modalTitle').textContent = 'Edit Product';
+    document.getElementById('fId').value = p.id;
+    document.getElementById('fId').disabled = true;
+    document.getElementById('fCategory').value = p.category;
+    document.getElementById('fName').value = p.name;
+    document.getElementById('fPrice').value = p.price;
+    document.getElementById('fStripePrice').value = p.stripePrice || '';
+    document.getElementById('fShortDesc').value = p.shortDesc || '';
+    document.getElementById('fDescription').value = p.description || '';
+    document.getElementById('fEmoji').value = p.emoji || '';
+    document.getElementById('fBadge').value = p.badge || '';
+    document.getElementById('fInStock').checked = p.inStock !== false;
+    document.getElementById('fFeatured').checked = !!p.featured;
+    editingImages = [...(p.images || [])];
+  } else {
+    document.getElementById('modalTitle').textContent = 'Add Product';
+    document.getElementById('fId').disabled = false;
+    document.getElementById('fId').value = '';
+    document.getElementById('fCategory').value = 'prints';
+    document.getElementById('fName').value = '';
+    document.getElementById('fPrice').value = '';
+    document.getElementById('fStripePrice').value = '';
+    document.getElementById('fShortDesc').value = '';
+    document.getElementById('fDescription').value = '';
+    document.getElementById('fEmoji').value = '🖼️';
+    document.getElementById('fBadge').value = '';
+    document.getElementById('fInStock').checked = true;
+    document.getElementById('fFeatured').checked = false;
+    editingImages = [];
+  }
+
+  renderImagesList();
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('fId').focus();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  editingId = null;
+}
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+/* ── Image management ── */
+function renderImagesList() {
+  const list = document.getElementById('imagesList');
+  list.innerHTML = editingImages.map((url, i) => `
+    <div class="image-thumb-wrap">
+      <div class="image-thumb"><img src="${url}" alt=""></div>
+      <button class="image-thumb-remove" onclick="removeImage(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+
+function removeImage(i) {
+  editingImages.splice(i, 1);
+  renderImagesList();
+}
+
+async function uploadImages(files) {
+  if (!files.length) return;
+  const progress = document.getElementById('uploadProgress');
+  progress.style.display = 'block';
+  progress.textContent = `Uploading ${files.length} image(s)…`;
+
+  for (const file of files) {
+    const form = new FormData();
+    form.append('image', file);
+    try {
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: form });
+      const data = await res.json();
+      if (data.url) editingImages.push(data.url);
+    } catch (err) {
+      showToast('Upload failed: ' + err.message, 'error');
+    }
+  }
+
+  document.getElementById('imageFile').value = '';
+  renderImagesList();
+  progress.style.display = 'none';
+}
+
+/* drag-over styling */
+const ua = document.getElementById('uploadArea');
+ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('drag'); });
+ua.addEventListener('dragleave', () => ua.classList.remove('drag'));
+ua.addEventListener('drop', e => {
+  e.preventDefault();
+  ua.classList.remove('drag');
+  uploadImages(e.dataTransfer.files);
+});
+
+/* ── Save / Delete ── */
+function saveProduct() {
+  const id = document.getElementById('fId').value.trim();
+  if (!id) { showToast('Product ID is required', 'error'); return; }
+  if (!/^[a-z0-9-]+$/.test(id)) { showToast('ID must be lowercase letters, numbers, and hyphens only', 'error'); return; }
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { showToast('Name is required', 'error'); return; }
+  const price = parseFloat(document.getElementById('fPrice').value);
+  if (isNaN(price) || price < 0) { showToast('Enter a valid price', 'error'); return; }
+
+  const product = {
+    id,
+    name,
+    category: document.getElementById('fCategory').value,
+    price,
+    stripePrice: document.getElementById('fStripePrice').value.trim() || 'REPLACE_WITH_STRIPE_PRICE_ID',
+    shortDesc: document.getElementById('fShortDesc').value.trim(),
+    description: document.getElementById('fDescription').value.trim(),
+    images: [...editingImages],
+    emoji: document.getElementById('fEmoji').value.trim() || '🎨',
+    badge: document.getElementById('fBadge').value.trim() || null,
+    inStock: document.getElementById('fInStock').checked,
+    featured: document.getElementById('fFeatured').checked,
+  };
+
+  if (editingId !== null) {
+    products[editingId] = product;
+  } else {
+    const conflict = products.find(p => p.id === id);
+    if (conflict) { showToast('A product with that ID already exists', 'error'); return; }
+    products.push(product);
+  }
+
+  closeModal();
+  renderList();
+  saveAll();
+}
+
+function askDelete() {
+  document.getElementById('deleteConfirm').classList.add('open');
+}
+
+function confirmDelete() {
+  if (editingId === null) return;
+  products.splice(editingId, 1);
+  closeModal();
+  renderList();
+  saveAll();
+}
+
+async function saveAll() {
+  setStatus('Saving…');
+  try {
+    const res = await fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: adminPassword, products }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Save failed');
+    setStatus('Saved ✓', 'saved');
+    showToast('Products saved', 'success');
+    setTimeout(() => setStatus(''), 3000);
+  } catch (err) {
+    setStatus('Error: ' + err.message, 'error');
+    showToast('Save failed: ' + err.message, 'error');
+  }
+}
+
+function setStatus(msg, cls = '') {
+  const el = document.getElementById('adminStatus');
+  el.textContent = msg;
+  el.className = 'admin-status ' + cls;
+}
+
+/* ── Toast ── */
+function showToast(msg, type = '') {
+  const el = document.getElementById('toastMsg');
+  el.textContent = msg;
+  el.className = 'toast-msg show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

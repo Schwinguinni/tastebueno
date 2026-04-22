@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop — TasteBueno</title>
+  <meta name="description" content="Art prints, original artwork, stickers and spray paint. Made for street artists.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Black+Ops+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+
+<div class="announcement-bar">
+  🚀 Free shipping on orders over $75 — ships in 24 hours
+</div>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Taste<span>Bueno</span></a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/shop.html" class="active">Shop</a></li>
+        <li><a href="/custom.html">Custom Stencils</a></li>
+        <li><a href="/contact.html">About & Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button class="cart-btn" data-cart-open aria-label="Open cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Cart
+        <span class="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Shop Header -->
+<div class="container">
+  <div class="shop-header">
+    <h1 class="heading-lg">Shop</h1>
+  </div>
+
+  <!-- Filters -->
+  <div class="shop-filters">
+    <button class="filter-btn active" data-filter="all">All Products</button>
+    <button class="filter-btn" data-filter="stencils">Stencils</button>
+    <button class="filter-btn" data-filter="prints">Art Prints</button>
+    <button class="filter-btn" data-filter="originals">Originals</button>
+    <button class="filter-btn" data-filter="stickers">Stickers</button>
+    <button class="filter-btn" data-filter="spray">Spray Paint</button>
+  </div>
+</div>
+
+<!-- Stencils -->
+<section class="section-sm shop-section" id="stencils" style="padding-top:3rem;padding-bottom:3rem;">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="heading-sm">Stencils</h2>
+    </div>
+    <div class="products-grid"></div>
+  </div>
+</section>
+
+<!-- Art Prints -->
+<section class="section-sm shop-section" id="prints" style="background:var(--bg-alt);padding-top:3rem;padding-bottom:3rem;">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="heading-sm">Art Prints</h2>
+    </div>
+    <div class="products-grid"></div>
+  </div>
+</section>
+
+<!-- Originals -->
+<section class="section-sm shop-section" id="originals">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="heading-sm">Original Artwork</h2>
+    </div>
+    <div class="products-grid"></div>
+  </div>
+</section>
+
+<!-- Stickers -->
+<section class="section-sm shop-section" id="stickers" style="background:var(--bg-alt);padding-top:3rem;padding-bottom:3rem;">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="heading-sm">Stickers</h2>
+    </div>
+    <div class="products-grid"></div>
+  </div>
+</section>
+
+<!-- Spray Paint -->
+<section class="section-sm shop-section" id="spray">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="heading-sm">Spray Paint</h2>
+    </div>
+    <div class="products-grid"></div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand-logo">Taste<span>Bueno</span></div>
+        <p class="footer-brand-desc">Custom stencils, prints & street art supplies. Shipped in 24 hours.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="/custom.html">Custom Stencils</a></li>
+          <li><a href="#stencils">Stencils</a></li>
+          <li><a href="#prints">Art Prints</a></li>
+          <li><a href="#originals">Originals</a></li>
+          <li><a href="#stickers">Stickers</a></li>
+          <li><a href="#spray">Spray Paint</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Info</h4>
+        <ul>
+          <li><a href="/contact.html">About & Contact</a></li>
+          <li><a href="/shipping.html">Shipping</a></li>
+          <li><a href="/returns.html">Returns</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="mailto:hello@tastebueno.com">hello@tastebueno.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 TasteBueno. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Cart Drawer -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-drawer-header">
+    <h2>Your Cart</h2>
+    <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty" id="cartEmpty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <p>Your cart is empty</p>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-subtotal">
+      <span>Subtotal</span>
+      <span id="cartSubtotal">$0.00</span>
+    </div>
+    <p class="cart-subtotal-note">Shipping calculated at checkout</p>
+    <button class="cart-checkout-btn" id="cartCheckoutBtn" disabled>Checkout →</button>
+  </div>
+</div>
+
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script>
+  function applyFilter(filter) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-filter="${filter}"]`)?.classList.add('active');
+
+    document.querySelectorAll('.shop-section').forEach(section => {
+      const cards = section.querySelectorAll('[data-cat]');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const show = filter === 'all' || card.dataset.cat === filter;
+        card.closest('.product-card').style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      section.style.display = visibleCount > 0 ? '' : 'none';
+    });
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+  });
+
+  (async () => {
+    await Products.renderShop();
+
+    // Activate from URL hash (e.g. /shop.html#stickers)
+    const hash = window.location.hash.replace('#', '');
+    if (hash && document.querySelector(`[data-filter="${hash}"]`)) {
+      applyFilter(hash);
+      document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  })();
+</script>
+</body>
+</html>

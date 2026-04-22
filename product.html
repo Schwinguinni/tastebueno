@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product — TasteBueno</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <style>
+    .product-page { padding: 3rem 0 5rem; }
+    .product-page-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    @media (max-width: 768px) { .product-page-grid { grid-template-columns: 1fr; gap: 2rem; } }
+    .product-gallery { position: sticky; top: 88px; }
+    .product-main-img {
+      aspect-ratio: 1;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-size: 5rem;
+      margin-bottom: .75rem;
+    }
+    .product-main-img img { width: 100%; height: 100%; object-fit: cover; }
+    .product-thumbs { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .product-thumb {
+      width: 72px; height: 72px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg-alt);
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .2s;
+    }
+    .product-thumb.active { border-color: var(--text); }
+    .product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .product-info { }
+    .product-breadcrumb {
+      font-size: .8125rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .product-breadcrumb a { color: var(--text-muted); transition: color .2s; }
+    .product-breadcrumb a:hover { color: var(--text); }
+    .product-page-name { font-family: var(--font-head); font-size: clamp(2rem,4vw,3rem); line-height: 1.05; margin-bottom: .5rem; }
+    .product-page-price { font-size: 2rem; font-weight: 800; margin-bottom: 1.5rem; }
+    .product-page-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+      white-space: pre-line;
+    }
+    .product-add-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .product-add-row .qty-sel { flex-shrink: 0; }
+    .product-add-btn {
+      flex: 1;
+      min-width: 160px;
+      padding: 1rem 1.5rem;
+      background: var(--text);
+      color: var(--white);
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+      font-family: var(--font-body);
+    }
+    .product-add-btn:hover { background: #333; }
+    .product-add-btn.added { background: #16a34a; }
+    .product-meta { border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; flex-direction: column; gap: .625rem; }
+    .product-meta-row { display: flex; gap: .5rem; font-size: .875rem; }
+    .product-meta-label { color: var(--text-muted); min-width: 120px; }
+    .product-meta-value { font-weight: 500; }
+    .out-of-stock { color: var(--red); font-weight: 600; }
+    .loading-placeholder { text-align: center; padding: 6rem 1.5rem; color: var(--text-muted); }
+    .not-found { text-align: center; padding: 6rem 1.5rem; }
+    .not-found h2 { font-family: var(--font-head); font-size: 2rem; margin-bottom: 1rem; }
+
+    /* Variant selectors */
+    .variant-group { margin-bottom: 1.25rem; }
+    .variant-label { font-size: .8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: .5rem; display: flex; gap: .5rem; align-items: baseline; }
+    .variant-label-value { font-weight: 600; color: var(--text); text-transform: none; letter-spacing: 0; font-size: .9rem; }
+    .variant-btns { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .variant-btn {
+      padding: .5rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      cursor: pointer;
+      font-size: .875rem;
+      font-weight: 500;
+      font-family: var(--font-body);
+      transition: border-color .15s, background .15s;
+      color: var(--text);
+    }
+    .variant-btn:hover { border-color: #999; }
+    .variant-btn.active { border-color: var(--text); background: var(--text); color: #fff; }
+    .variant-btn.sold-out { opacity: .4; cursor: not-allowed; text-decoration: line-through; }
+  </style>
+</head>
+<body>
+
+<div class="announcement-bar">
+  🚀 Free shipping on orders over $75 — ships in 24 hours
+</div>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Taste<span>Bueno</span></a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/custom.html">Custom Stencils</a></li>
+        <li><a href="/contact.html">About & Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button class="cart-btn" data-cart-open aria-label="Open cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Cart
+        <span class="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="product-page" id="productPage">
+    <div class="loading-placeholder">Loading...</div>
+  </div>
+</div>
+
+<!-- Related products -->
+<section style="background:var(--bg-alt);border-top:1px solid var(--border);padding:4rem 0;" id="relatedSection" hidden>
+  <div class="container">
+    <div class="section-header">
+      <h2 class="heading-sm">You Might Also Like</h2>
+      <a href="/shop.html" class="view-all">View all →</a>
+    </div>
+    <div class="products-grid" id="relatedGrid"></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand-logo">Taste<span>Bueno</span></div>
+        <p class="footer-brand-desc">Custom stencils, prints & street art supplies. Shipped in 24 hours.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="/custom.html">Custom Stencils</a></li>
+          <li><a href="/shop.html#prints">Art Prints</a></li>
+          <li><a href="/shop.html#originals">Originals</a></li>
+          <li><a href="/shop.html#stickers">Stickers</a></li>
+          <li><a href="/shop.html#spray">Spray Paint</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Info</h4>
+        <ul>
+          <li><a href="/contact.html">About & Contact</a></li>
+          <li><a href="/shipping.html">Shipping</a></li>
+          <li><a href="/returns.html">Returns</a></li>
+        </ul>
+      </div>
+      <div class="footer-col"></div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 TasteBueno. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Cart Drawer -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-drawer-header">
+    <h2>Your Cart</h2>
+    <button class="cart-close-btn" id="cartCloseBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty" id="cartEmpty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <p>Your cart is empty</p>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-subtotal"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+    <p class="cart-subtotal-note">Shipping calculated at checkout</p>
+    <button class="cart-checkout-btn" id="cartCheckoutBtn" disabled>Checkout →</button>
+  </div>
+</div>
+
+<script src="/js/products.js"></script>
+<script src="/js/cart.js"></script>
+<script>
+(async () => {
+  const id = new URLSearchParams(location.search).get('id');
+  const page = document.getElementById('productPage');
+
+  if (!id) {
+    page.innerHTML = '<div class="not-found"><h2>Product not found</h2><a href="/shop.html" class="btn btn-primary" style="margin-top:1rem;">Back to Shop</a></div>';
+    return;
+  }
+
+  let products;
+  try {
+    products = await Products.load();
+  } catch (err) {
+    page.innerHTML = `<div class="not-found"><h2>Could not load products</h2><p style="color:var(--text-muted);margin:.5rem 0 1.5rem">Make sure the server is running: <code>node server.js</code></p><a href="/shop.html" class="btn btn-primary">Back to Shop</a></div>`;
+    console.error('Products.load() failed:', err);
+    return;
+  }
+
+  const p = products.find(x => x.id === id);
+
+  if (!p) {
+    page.innerHTML = '<div class="not-found"><h2>Product not found</h2><a href="/shop.html" class="btn btn-primary" style="margin-top:1rem;">Back to Shop</a></div>';
+    return;
+  }
+
+  document.title = `${p.name} — TasteBueno`;
+
+  // Build image gallery
+  let currentImg = 0;
+  const imgs = p.images?.length ? p.images : [];
+
+  const mainImgEl = imgs.length
+    ? `<img id="mainImg" src="${imgs[0]}" alt="${p.name}">`
+    : `<span>${p.emoji || '🎨'}</span>`;
+
+  const thumbsHTML = imgs.length > 1
+    ? imgs.map((url, i) => `<div class="product-thumb ${i===0?'active':''}" data-thumb="${i}"><img src="${url}" alt=""></div>`).join('')
+    : '';
+
+  const categoryLabels = { stencils: 'Stencils', prints: 'Art Prints', originals: 'Originals', stickers: 'Stickers', spray: 'Spray Paint' };
+
+  // Variant helpers
+  const hasVariants = p.variants?.length > 0;
+  const sizes     = hasVariants ? [...new Set(p.variants.map(v => v.size))]     : [];
+  const materials = hasVariants ? [...new Set(p.variants.map(v => v.material))] : [];
+
+  const variantSelectorsHTML = hasVariants ? `
+    <div class="variant-group">
+      <div class="variant-label">Size <span class="variant-label-value" id="selectedSizeLabel">${sizes[0]}</span></div>
+      <div class="variant-btns" id="sizeSelector">
+        ${sizes.map((s, i) => `<button class="variant-btn ${i===0?'active':''}" data-size="${s}">${s}</button>`).join('')}
+      </div>
+    </div>
+    <div class="variant-group">
+      <div class="variant-label">Material <span class="variant-label-value" id="selectedMaterialLabel">${materials[0]}</span></div>
+      <div class="variant-btns" id="materialSelector">
+        ${materials.map((m, i) => `<button class="variant-btn ${i===0?'active':''}" data-material="${m}">${m}</button>`).join('')}
+      </div>
+    </div>` : '';
+
+  const initPrice = hasVariants ? p.variants[0].price : p.price;
+  const initInStock = hasVariants ? p.variants[0].inStock !== false : p.inStock !== false;
+
+  page.innerHTML = `
+    <nav class="product-breadcrumb">
+      <a href="/">Home</a> /
+      <a href="/shop.html">Shop</a> /
+      <a href="/shop.html#${p.category}">${categoryLabels[p.category] || p.category}</a> /
+      <span>${p.name}</span>
+    </nav>
+    <div class="product-page-grid">
+      <div class="product-gallery">
+        <div class="product-main-img">${mainImgEl}</div>
+        ${thumbsHTML ? `<div class="product-thumbs">${thumbsHTML}</div>` : ''}
+      </div>
+      <div class="product-info">
+        <h1 class="product-page-name">${p.name}</h1>
+        <div class="product-page-price" id="priceDisplay">$${initPrice.toFixed(2)}</div>
+        <p class="product-page-desc">${p.description || p.shortDesc || ''}</p>
+        ${variantSelectorsHTML}
+        <div id="stockArea">
+          ${initInStock ? `
+          <div class="product-add-row">
+            <div class="qty-sel">
+              <button id="qtyMinus">−</button>
+              <input type="number" id="qtyInput" value="1" min="1" max="99">
+              <button id="qtyPlus">+</button>
+            </div>
+            <button class="product-add-btn" id="addBtn">Add to Cart</button>
+          </div>` : '<p class="out-of-stock">Out of stock</p>'}
+        </div>
+        <div class="product-meta">
+          <div class="product-meta-row"><span class="product-meta-label">Category</span><span class="product-meta-value">${categoryLabels[p.category] || p.category}</span></div>
+          <div class="product-meta-row"><span class="product-meta-label">Ships in</span><span class="product-meta-value">1–3 business days</span></div>
+          <div class="product-meta-row"><span class="product-meta-label">Returns</span><span class="product-meta-value">Money-back guarantee</span></div>
+        </div>
+      </div>
+    </div>`;
+
+  // Thumbnail switching
+  document.querySelectorAll('[data-thumb]').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      const i = parseInt(thumb.dataset.thumb);
+      const mainImg = document.getElementById('mainImg');
+      if (mainImg) mainImg.src = imgs[i];
+      document.querySelectorAll('[data-thumb]').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+    });
+  });
+
+  // Variant selection
+  let selectedSize     = sizes[0] || null;
+  let selectedMaterial = materials[0] || null;
+
+  function getVariant() {
+    if (!hasVariants) return null;
+    return p.variants.find(v => v.size === selectedSize && v.material === selectedMaterial) || null;
+  }
+
+  function updateStockArea(variant) {
+    const inStock = variant ? variant.inStock !== false : p.inStock !== false;
+    const stockArea = document.getElementById('stockArea');
+    if (!stockArea) return;
+    if (inStock) {
+      stockArea.innerHTML = `
+        <div class="product-add-row">
+          <div class="qty-sel">
+            <button id="qtyMinus">−</button>
+            <input type="number" id="qtyInput" value="1" min="1" max="99">
+            <button id="qtyPlus">+</button>
+          </div>
+          <button class="product-add-btn" id="addBtn">Add to Cart</button>
+        </div>`;
+      wireAddToCart();
+    } else {
+      stockArea.innerHTML = '<p class="out-of-stock">Out of stock</p>';
+    }
+  }
+
+  if (hasVariants) {
+    document.getElementById('sizeSelector')?.querySelectorAll('[data-size]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedSize = btn.dataset.size;
+        document.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('selectedSizeLabel').textContent = selectedSize;
+        const v = getVariant();
+        if (v) {
+          document.getElementById('priceDisplay').textContent = '$' + v.price.toFixed(2);
+          updateStockArea(v);
+        }
+      });
+    });
+
+    document.getElementById('materialSelector')?.querySelectorAll('[data-material]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedMaterial = btn.dataset.material;
+        document.querySelectorAll('[data-material]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('selectedMaterialLabel').textContent = selectedMaterial;
+        const v = getVariant();
+        if (v) {
+          document.getElementById('priceDisplay').textContent = '$' + v.price.toFixed(2);
+          updateStockArea(v);
+        }
+      });
+    });
+  }
+
+  // Qty controls + add to cart — called once on load and again after stock area re-render
+  function wireAddToCart() {
+    const addBtn  = document.getElementById('addBtn');
+    const qtyInput = document.getElementById('qtyInput');
+    document.getElementById('qtyMinus')?.addEventListener('click', () => {
+      qtyInput.value = Math.max(1, parseInt(qtyInput.value) - 1);
+    });
+    document.getElementById('qtyPlus')?.addEventListener('click', () => {
+      qtyInput.value = Math.min(99, parseInt(qtyInput.value) + 1);
+    });
+    addBtn?.addEventListener('click', () => {
+      const variant = getVariant();
+      const price   = variant ? variant.price   : p.price;
+      const priceId = variant ? variant.stripePrice : (p.stripePrice || '');
+      const optKey  = variant ? variant.key      : 'default';
+      const opts    = variant ? `${variant.size} · ${variant.material}` : '';
+      Cart.add({
+        id: p.id, optKey, name: p.name,
+        price, priceId,
+        qty: parseInt(qtyInput?.value) || 1,
+        opts, image: imgs[0] || '', emoji: p.emoji || '🎨',
+      });
+      addBtn.textContent = '✓ Added!';
+      addBtn.classList.add('added');
+      setTimeout(() => { addBtn.textContent = 'Add to Cart'; addBtn.classList.remove('added'); }, 2000);
+      Cart.openDrawer();
+    });
+  }
+
+  wireAddToCart();
+
+  // Related products
+  const related = products.filter(x => x.id !== id && x.category === p.category).slice(0, 4);
+  if (related.length) {
+    const section = document.getElementById('relatedSection');
+    const grid = document.getElementById('relatedGrid');
+    section.hidden = false;
+    grid.innerHTML = related.map(Products.cardHTML).join('');
+  }
+})();
+</script>
+</body>
+</html>

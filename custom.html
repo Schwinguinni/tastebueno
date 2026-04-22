@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Custom Halftone Stencil Designer — TasteBueno</title>
+  <meta name="description" content="Upload any photo and design your own spray-paint stencil. Live preview, AI background removal, ships in 24 hours.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Black+Ops+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+
+<div class="announcement-bar">
+  🚀 Ships in 24 hours · Money-back guarantee · Secure checkout
+</div>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Taste<span>Bueno</span></a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/custom.html" class="active">Custom Stencils</a></li>
+        <li><a href="/contact.html">About & Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button class="cart-btn" data-cart-open aria-label="Open cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Cart
+        <span class="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Page header -->
+<div style="background:var(--bg-alt);border-bottom:1px solid var(--border);padding:2rem 0;">
+  <div class="container">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;">
+      <span style="font-size:.8125rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--red);">Custom Stencil Designer</span>
+    </div>
+    <h1 class="heading-lg" style="line-height:1;">Turn Any Photo Into<br>A <span style="color:var(--red)">Professional Stencil</span></h1>
+    <p style="color:var(--text-muted);margin-top:.75rem;font-size:1rem;">Upload · Customize · Order. We handle the rest.</p>
+  </div>
+</div>
+
+<main class="container">
+  <div class="designer-grid">
+
+    <!-- Canvas -->
+    <div class="canvas-container" id="canvasContainer">
+      <div class="upload-zone" id="uploadZone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <div>
+          <p class="upload-title">Drag & Drop Your Image Here</p>
+          <p class="upload-sub">or click to browse · JPG, PNG, WEBP</p>
+        </div>
+      </div>
+      <canvas id="halftoneCanvas"></canvas>
+      <div class="canvas-actions" id="canvasActions">
+        <button class="canvas-action-btn" id="downloadBtn" title="Download preview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button class="canvas-action-btn" id="resetBtn" title="Start over">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        </button>
+      </div>
+      <div class="processing-overlay" id="processingOverlay">
+        <div class="processing-message">
+          <div class="spinner"></div>
+          <p id="processingText">Processing...</p>
+          <p class="sub" id="processingSubtext"></p>
+          <p id="progressPercent"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop Controls -->
+    <div class="controls-panel">
+      <div class="control-card">
+        <div class="control-title">Customize Your Stencil</div>
+        <div class="control-group">
+          <label class="control-label">Size</label>
+          <div class="option-row">
+            <button class="opt-btn" data-size="11x14">11×14"<br><small style="font-size:.7rem;font-weight:400;opacity:.6;">from $24.95</small></button>
+            <button class="opt-btn active" data-size="22x28">22×28"<br><small style="font-size:.7rem;font-weight:400;opacity:.6;">from $49.95</small></button>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Material</label>
+          <div class="option-row">
+            <button class="opt-btn active" data-material="Card Stock">Card Stock</button>
+            <button class="opt-btn" data-material="Plastic">Plastic</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="checkbox-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="removeBgCheckbox">
+              <span>AI Background Removal</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="invertCheckbox">
+              <span>Invert Colors</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price & Order -->
+      <div class="price-box" id="priceBoxDesktop">
+        <span class="price-box-label">Price</span>
+        <div class="price-box-value" id="priceValueDesktop">$49.95</div>
+        <div class="in-stock"><span class="in-stock-dot"></span> In stock — ships in 24 hours</div>
+        <div class="qty-row-small">
+          <span class="qty-label-sm">Quantity</span>
+          <div class="qty-sel">
+            <button id="qtyMinusDesktop">−</button>
+            <input type="number" id="qtyInputDesktop" value="1" min="1" max="99">
+            <button id="qtyPlusDesktop">+</button>
+          </div>
+        </div>
+        <button class="order-btn" id="orderBtnDesktop" disabled>Upload an Image to Order</button>
+      </div>
+    </div>
+
+  </div><!-- /designer-grid -->
+</main>
+
+<!-- How it works -->
+<section style="background:var(--bg-alt);border-top:1px solid var(--border);padding:4rem 0;margin-top:2rem;">
+  <div class="container">
+    <h2 class="heading-md" style="text-align:center;margin-bottom:3rem;">How It Works</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;max-width:800px;margin:0 auto;text-align:center;">
+      <div>
+        <div style="width:3rem;height:3rem;background:rgba(220,38,38,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h3 style="font-weight:700;margin-bottom:.375rem;">1. Upload</h3>
+        <p style="font-size:.875rem;color:var(--text-muted);">Choose any photo — portraits, logos, pets, anything.</p>
+      </div>
+      <div>
+        <div style="width:3rem;height:3rem;background:rgba(220,38,38,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <h3 style="font-weight:700;margin-bottom:.375rem;">2. Customize</h3>
+        <p style="font-size:.875rem;color:var(--text-muted);">Pick your size, material, and options. See it live.</p>
+      </div>
+      <div>
+        <div style="width:3rem;height:3rem;background:rgba(220,38,38,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        </div>
+        <h3 style="font-weight:700;margin-bottom:.375rem;">3. Order</h3>
+        <p style="font-size:.875rem;color:var(--text-muted);">We print and ship your stencil in 24 hours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand-logo">Taste<span>Bueno</span></div>
+        <p class="footer-brand-desc">Custom stencils, prints & street art supplies. Shipped in 24 hours.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="/custom.html">Custom Stencils</a></li>
+          <li><a href="/shop.html#prints">Art Prints</a></li>
+          <li><a href="/shop.html#stickers">Stickers</a></li>
+          <li><a href="/shop.html#spray">Spray Paint</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="mailto:hello@tastebueno.com">hello@tastebueno.com</a></li>
+          <li><a href="/returns.html">Returns</a></li>
+        </ul>
+      </div>
+      <div class="footer-col"></div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 TasteBueno. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Mobile Sheet -->
+<div class="mobile-sheet" id="mobileSheet">
+  <div class="mobile-sheet-handle" id="mobileSheetHandle">
+    <div class="mobile-sheet-handle-bar"></div>
+  </div>
+  <div class="mobile-sheet-header">
+    <div class="mobile-sheet-price" id="mobileSheetPrice">$49.95</div>
+    <button class="mobile-sheet-toggle" id="mobileSheetToggle">
+      Customize
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+    </button>
+  </div>
+  <div class="mobile-sheet-content">
+    <div class="mobile-opt-row">
+      <button class="opt-btn" data-mobile-size="11x14">11×14"</button>
+      <button class="opt-btn active" data-mobile-size="22x28">22×28"</button>
+    </div>
+    <div class="mobile-opt-row">
+      <button class="opt-btn active" data-mobile-material="Card Stock">Card Stock</button>
+      <button class="opt-btn" data-mobile-material="Plastic">Plastic</button>
+    </div>
+    <div class="mobile-checkbox-row">
+      <label class="mobile-checkbox-label">
+        <input type="checkbox" id="mobileRemoveBgCheckbox">
+        <span>AI Remove BG</span>
+      </label>
+      <label class="mobile-checkbox-label">
+        <input type="checkbox" id="mobileInvertCheckbox">
+        <span>Invert</span>
+      </label>
+    </div>
+    <div class="mobile-qty-row">
+      <span class="qty-label-sm">Quantity</span>
+      <div class="qty-sel">
+        <button id="qtyMinusMobile">−</button>
+        <input type="number" id="qtyInputMobile" value="1" min="1" max="99">
+        <button id="qtyPlusMobile">+</button>
+      </div>
+    </div>
+    <button class="mobile-order-btn" id="orderBtnMobile" disabled>Upload an Image to Order</button>
+  </div>
+</div>
+
+<!-- Cart Drawer -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-drawer-header">
+    <h2>Your Cart</h2>
+    <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty" id="cartEmpty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <p>Your cart is empty</p>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-subtotal">
+      <span>Subtotal</span>
+      <span id="cartSubtotal">$0.00</span>
+    </div>
+    <p class="cart-subtotal-note">Shipping calculated at checkout</p>
+    <button class="cart-checkout-btn" id="cartCheckoutBtn" disabled>Checkout →</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <p class="toast-title" id="toastTitle"></p>
+  <p class="toast-desc" id="toastDesc"></p>
+</div>
+
+<input type="file" id="fileInput" class="file-input" accept="image/*">
+
+<!-- Background removal service -->
+<script type="module">
+const S = "https://bg.trappedgpt.com";
+let avail = null;
+async function chk() {
+  try {
+    const r = await fetch(`${S}/health`, { method: "GET", mode: "cors" });
+    if (r.ok && (await r.json()).status === "ok") { avail = true; return true; }
+  } catch(e) {}
+  avail = false; return false;
+}
+async function rmBg(img) {
+  const c = document.createElement("canvas");
+  c.width = img.naturalWidth || img.width;
+  c.height = img.naturalHeight || img.height;
+  c.getContext("2d").drawImage(img, 0, 0);
+  const d = c.toDataURL("image/png");
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 60000);
+  try {
+    const r = await fetch(`${S}/remove-background`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: d }), signal: ctrl.signal
+    });
+    clearTimeout(t);
+    if (!r.ok) throw new Error((await r.json()).error || "Error");
+    const data = await r.json();
+    if (!data.success) throw new Error(data.error || "Failed");
+    const n = new Image();
+    return new Promise((res, rej) => { n.onload = () => res(n); n.onerror = () => rej(new Error("Load failed")); n.src = data.image; });
+  } catch(e) { clearTimeout(t); throw e; }
+}
+window.removeBackground = async function(img) {
+  if (avail === false) throw new Error("Offline");
+  try { const r = await rmBg(img); avail = true; return r; }
+  catch(e) { avail = false; throw e; }
+};
+chk(); setInterval(chk, 30000);
+</script>
+
+<!-- Cloudinary config — fill in your cloud name and upload preset -->
+<script>
+window.CLOUDINARY_CLOUD_NAME = 'REPLACE_WITH_YOUR_CLOUDINARY_CLOUD_NAME';
+window.CLOUDINARY_UPLOAD_PRESET = 'REPLACE_WITH_YOUR_UPLOAD_PRESET';
+</script>
+
+<!-- Designer logic -->
+<script>
+!function() {
+  "use strict";
+
+  const PRICES = {
+    "11x14": { "Card Stock": 24.95, "Plastic": 34.95 },
+    "22x28": { "Card Stock": 49.95, "Plastic": 64.95 }
+  };
+
+  const st = {
+    size: "22x28", material: "Card Stock",
+    inv: false, rmBg: false,
+    origImg: null, procImg: null, origName: "",
+    processing: false
+  };
+
+  const $ = id => document.getElementById(id);
+  const el = {
+    cv: $("halftoneCanvas"), uz: $("uploadZone"), fi: $("fileInput"),
+    ca: $("canvasActions"), po: $("processingOverlay"),
+    pt: $("processingText"), ps: $("processingSubtext"), pp: $("progressPercent"),
+    ic: $("invertCheckbox"), rc: $("removeBgCheckbox"),
+    pvd: $("priceValueDesktop"),
+    obd: $("orderBtnDesktop"), obm: $("orderBtnMobile"),
+    db: $("downloadBtn"), rb: $("resetBtn"),
+    t: $("toast"), tt: $("toastTitle"), td: $("toastDesc"),
+    ms: $("mobileSheet"), msh: $("mobileSheetHandle"),
+    mst: $("mobileSheetToggle"), msp: $("mobileSheetPrice"),
+    mic: $("mobileInvertCheckbox"), mrc: $("mobileRemoveBgCheckbox"),
+    qid: $("qtyInputDesktop"), qmd: $("qtyMinusDesktop"), qpd: $("qtyPlusDesktop"),
+    qim: $("qtyInputMobile"), qmm: $("qtyMinusMobile"), qpm: $("qtyPlusMobile")
+  };
+
+  const ctx = el.cv.getContext("2d", { willReadFrequently: true });
+
+  function toast(title, desc, type) {
+    el.tt.textContent = title;
+    el.td.textContent = desc || "";
+    el.t.className = "toast " + (type || "success") + " show";
+    setTimeout(() => el.t.classList.remove("show"), 3500);
+  }
+
+  function showProc(t, s, withProgress) {
+    el.pt.textContent = t; el.ps.textContent = s || "";
+    el.pp.style.display = withProgress ? "block" : "none";
+    if (withProgress) el.pp.textContent = "0%";
+    el.po.classList.add("visible");
+  }
+
+  function hideProc() {
+    el.po.classList.remove("visible");
+    el.pp.style.display = "none";
+  }
+
+  function updPrice() {
+    const p = PRICES[st.size][st.material];
+    const s = "$" + p.toFixed(2);
+    el.pvd.textContent = s;
+    el.msp.textContent = s;
+  }
+
+  function getDims(sz, land) {
+    if (sz === "11x14") return land ? { w: 1008, h: 792 } : { w: 792, h: 1008 };
+    return land ? { w: 2106, h: 1584 } : { w: 1584, h: 2106 };
+  }
+
+  function render(tc, dims) {
+    const img = st.procImg || st.origImg;
+    if (!img) return;
+    const det = st.size === "11x14" ? 6 : 3;
+    const dd = 2 + 0.8 * (det - 1);
+    const br = Math.max(2, 5.5 - 0.52 * (dd - 2));
+    const sm = { 1: 1, 2: 0.99, 3: 0.92, 4: 0.92, 5: 0.9, 6: 0.87 }[det] || 1;
+    const cm = st.size === "11x14" ? 1.3 : 1;
+    const rad = br * sm * cm;
+    const sp = Math.min(2.2, 1.08 + 0.16 * (dd - 2));
+
+    tc.fillStyle = st.inv ? "#000" : "#fff";
+    tc.fillRect(0, 0, dims.w, dims.h);
+
+    tc.save(); tc.beginPath(); tc.rect(0, 0, dims.w, dims.h); tc.clip();
+    const sX = dims.w / img.width, sY = dims.h / img.height;
+    const sc = Math.max(sX, sY);
+    const dW = img.width * sc, dH = img.height * sc;
+    const oX = (dims.w - dW) / 2, oY = (dims.h - dH) / 2;
+    tc.drawImage(img, oX, oY, dW, dH);
+    tc.restore();
+
+    const px = tc.getImageData(0, 0, dims.w, dims.h).data;
+    const con = 0.1, fac = 259 * (255 * con + 255) / (255 * (259 - 255 * con));
+    for (let i = 0; i < px.length; i += 4) {
+      let g = 0.299 * px[i] + 0.587 * px[i+1] + 0.114 * px[i+2];
+      g = fac * (g - 128) + 128; g = Math.max(0, Math.min(255, g));
+      px[i] = px[i+1] = px[i+2] = g;
+    }
+
+    tc.fillStyle = st.inv ? "#000" : "#fff";
+    tc.fillRect(0, 0, dims.w, dims.h);
+    const gs = 30 / dd * sp;
+    tc.fillStyle = st.inv ? "#fff" : "#000";
+    for (let y = 0; y < dims.h; y += gs) {
+      for (let x = 0; x < dims.w; x += gs) {
+        const idx = 4 * (Math.floor(y) * dims.w + Math.floor(x));
+        if (idx < 0 || idx >= px.length) continue;
+        if (!st.inv && px[idx + 3] < 128) continue;
+        const gray = px[idx];
+        const intensity = st.inv ? gray / 255 : (255 - gray) / 255;
+        let dr = intensity * rad;
+        if (intensity > 0.85 && det > 1) dr *= 1 - 0.18 * ((intensity - 0.85) / 0.15);
+        if (!st.inv) dr *= 1.08;
+        if (dr < 0.1) continue;
+        tc.beginPath(); tc.arc(x, y, dr, 0, 2 * Math.PI); tc.fill();
+      }
+    }
+  }
+
+  function proc() {
+    const img = st.procImg || st.origImg;
+    if (!img) return;
+    st.processing = true;
+    showProc("Processing...");
+    setTimeout(() => {
+      const land = img.width > img.height;
+      const dims = getDims(st.size, land);
+      el.cv.width = dims.w; el.cv.height = dims.h;
+      render(ctx, dims);
+      st.processing = false;
+      hideProc();
+    }, 50);
+  }
+
+  function handleFile(f) {
+    if (!f || !f.type.startsWith("image/")) { toast("Invalid file", "Please upload an image", "error"); return; }
+    st.origName = f.name;
+    const r = new FileReader();
+    r.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        st.origImg = img;
+        st.procImg = img;
+        el.uz.classList.add("hidden");
+        el.cv.style.display = "block";
+        el.ca.classList.add("visible");
+        el.obd.disabled = false; el.obd.textContent = "Order This Stencil";
+        el.obm.disabled = false; el.obm.textContent = "Order This Stencil";
+        if (st.rmBg) handleBgRm(); else proc();
+      };
+      img.src = e.target.result;
+    };
+    r.readAsDataURL(f);
+  }
+
+  async function handleBgRm() {
+    if (!st.origImg) return;
+    if (st.rmBg) {
+      showProc("Removing background...", "AI processing", true);
+      const start = Date.now(), dur = 8000;
+      const pi = setInterval(() => {
+        const t = Math.min((Date.now() - start) / dur, 1);
+        el.pp.textContent = Math.floor((1 - Math.pow(1 - t, 3)) * 99) + "%";
+      }, 50);
+      try {
+        st.procImg = await window.removeBackground(st.origImg);
+        clearInterval(pi); el.pp.textContent = "100%";
+        toast("Background removed!");
+      } catch(e) {
+        clearInterval(pi);
+        toast("BG removal failed", "Using original image", "error");
+        st.procImg = st.origImg;
+      }
+      hideProc();
+    } else {
+      st.procImg = st.origImg;
+    }
+    proc();
+  }
+
+  function reset() {
+    st.origImg = null; st.procImg = null; st.origName = "";
+    el.uz.classList.remove("hidden");
+    el.cv.style.display = "none";
+    el.ca.classList.remove("visible");
+    el.fi.value = "";
+    el.obd.disabled = true; el.obd.textContent = "Upload an Image to Order";
+    el.obm.disabled = true; el.obm.textContent = "Upload an Image to Order";
+  }
+
+  function dl() {
+    el.cv.toBlob(b => {
+      const u = URL.createObjectURL(b);
+      const a = document.createElement("a");
+      a.href = u; a.download = "stencil_preview_" + st.size + ".png"; a.click();
+      URL.revokeObjectURL(u);
+    }, "image/png");
+  }
+
+  async function genFull() {
+    return new Promise(res => {
+      const img = st.procImg || st.origImg;
+      const tc = document.createElement("canvas");
+      const c = tc.getContext("2d");
+      const land = img.width > img.height;
+      const dims = getDims(st.size, land);
+      tc.width = dims.w; tc.height = dims.h;
+      render(c, dims);
+      tc.toBlob(res, "image/png");
+    });
+  }
+
+  async function uploadToCloudinary(blob, filename) {
+    const fd = new FormData();
+    fd.append("file", blob, filename);
+    fd.append("upload_preset", window.CLOUDINARY_UPLOAD_PRESET);
+    fd.append("folder", "tastebueno_orders");
+    const r = await fetch(
+      `https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CLOUD_NAME}/image/upload`,
+      { method: "POST", body: fd }
+    );
+    if (!r.ok) throw new Error("Image upload failed");
+    const data = await r.json();
+    return data.secure_url;
+  }
+
+  async function placeOrder() {
+    if (!st.origImg) { toast("No image", "Upload an image first", "error"); return; }
+
+    const price = PRICES[st.size][st.material];
+    const qty   = parseInt(el.qid.value) || 1;
+
+    el.obd.disabled = true; el.obm.disabled = true;
+    el.obd.textContent = "Processing..."; el.obm.textContent = "Processing...";
+    showProc("Preparing your order...");
+
+    try {
+      // Generate halftone
+      const hBlob = await genFull();
+
+      // Upload images to Cloudinary
+      let halftoneUrl = "", originalUrl = "";
+      try {
+        showProc("Uploading images...");
+        [halftoneUrl, originalUrl] = await Promise.all([
+          uploadToCloudinary(hBlob, "halftone.png"),
+          new Promise(res => {
+            const tc = document.createElement("canvas");
+            const c = tc.getContext("2d");
+            tc.width = st.origImg.width; tc.height = st.origImg.height;
+            c.drawImage(st.origImg, 0, 0);
+            tc.toBlob(b => uploadToCloudinary(b, st.origName || "original.png").then(res), "image/png");
+          })
+        ]);
+      } catch(uploadErr) {
+        // If Cloudinary not configured, proceed without image URLs
+        console.warn("Image upload skipped:", uploadErr.message);
+      }
+
+      showProc("Creating checkout...");
+
+      // Create Stripe checkout session
+      const res = await fetch("/api/custom-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          size: st.size,
+          material: st.material,
+          quantity: qty,
+          price: price,
+          halftoneUrl,
+          originalUrl,
+          inverted: st.inv,
+          bgRemoved: st.rmBg,
+          filename: st.origName || "image",
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Checkout failed");
+
+      hideProc();
+      window.location.href = data.url;
+
+    } catch(err) {
+      hideProc();
+      toast("Error", err.message || "Something went wrong", "error");
+      el.obd.disabled = false; el.obm.disabled = false;
+      el.obd.textContent = "Order This Stencil"; el.obm.textContent = "Order This Stencil";
+    }
+  }
+
+  function uQ(inputEl, delta) {
+    let v = parseInt(inputEl.value) || 1;
+    v = Math.max(1, Math.min(99, v + delta));
+    el.qid.value = v; el.qim.value = v;
+  }
+
+  function init() {
+    // Read URL params (from shop page links)
+    const params = new URLSearchParams(window.location.search);
+    const pSize = params.get("size"), pMat = params.get("material");
+    if (pSize && ["11x14","22x28"].includes(pSize)) st.size = pSize;
+    if (pMat === "plastic") st.material = "Plastic";
+
+    // Sync UI to state
+    document.querySelectorAll("[data-size]").forEach(b => b.classList.toggle("active", b.dataset.size === st.size));
+    document.querySelectorAll("[data-mobile-size]").forEach(b => b.classList.toggle("active", b.dataset.mobileSize === st.size));
+    document.querySelectorAll("[data-material]").forEach(b => b.classList.toggle("active", b.dataset.material === st.material));
+    document.querySelectorAll("[data-mobile-material]").forEach(b => b.classList.toggle("active", b.dataset.mobileMaterial === st.material));
+    updPrice();
+
+    el.uz.onclick = () => el.fi.click();
+    el.fi.onchange = e => { if (e.target.files[0]) handleFile(e.target.files[0]); };
+    el.uz.ondragover = e => { e.preventDefault(); el.uz.classList.add("dragging"); };
+    el.uz.ondragleave = () => el.uz.classList.remove("dragging");
+    el.uz.ondrop = e => {
+      e.preventDefault(); el.uz.classList.remove("dragging");
+      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    };
+
+    el.db.onclick = dl;
+    el.rb.onclick = reset;
+    el.obd.onclick = placeOrder;
+    el.obm.onclick = placeOrder;
+
+    el.qmd.onclick = () => uQ(el.qid, -1);
+    el.qpd.onclick = () => uQ(el.qid,  1);
+    el.qmm.onclick = () => uQ(el.qim, -1);
+    el.qpm.onclick = () => uQ(el.qim,  1);
+
+    // Size buttons
+    document.querySelectorAll("[data-size]").forEach(b => {
+      b.onclick = function() {
+        document.querySelectorAll("[data-size],[data-mobile-size]").forEach(x => x.classList.remove("active"));
+        this.classList.add("active");
+        document.querySelector(`[data-mobile-size="${this.dataset.size}"]`)?.classList.add("active");
+        st.size = this.dataset.size; updPrice(); if (st.origImg) proc();
+      };
+    });
+    document.querySelectorAll("[data-mobile-size]").forEach(b => {
+      b.onclick = function() {
+        document.querySelectorAll("[data-size],[data-mobile-size]").forEach(x => x.classList.remove("active"));
+        this.classList.add("active");
+        document.querySelector(`[data-size="${this.dataset.mobileSize}"]`)?.classList.add("active");
+        st.size = this.dataset.mobileSize; updPrice(); if (st.origImg) proc();
+      };
+    });
+
+    // Material buttons
+    document.querySelectorAll("[data-material]").forEach(b => {
+      b.onclick = function() {
+        document.querySelectorAll("[data-material],[data-mobile-material]").forEach(x => x.classList.remove("active"));
+        this.classList.add("active");
+        document.querySelector(`[data-mobile-material="${this.dataset.material}"]`)?.classList.add("active");
+        st.material = this.dataset.material; updPrice();
+      };
+    });
+    document.querySelectorAll("[data-mobile-material]").forEach(b => {
+      b.onclick = function() {
+        document.querySelectorAll("[data-material],[data-mobile-material]").forEach(x => x.classList.remove("active"));
+        this.classList.add("active");
+        document.querySelector(`[data-material="${this.dataset.mobileMaterial}"]`)?.classList.add("active");
+        st.material = this.dataset.mobileMaterial; updPrice();
+      };
+    });
+
+    // Checkboxes
+    el.ic.onchange = function() { st.inv = this.checked; el.mic.checked = this.checked; if (st.origImg) proc(); };
+    el.mic.onchange = function() { st.inv = this.checked; el.ic.checked = this.checked; if (st.origImg) proc(); };
+    el.rc.onchange = function() { st.rmBg = this.checked; el.mrc.checked = this.checked; if (st.origImg) handleBgRm(); };
+    el.mrc.onchange = function() { st.rmBg = this.checked; el.rc.checked = this.checked; if (st.origImg) handleBgRm(); };
+
+    // Mobile sheet toggle
+    function toggleSheet() { el.ms.classList.toggle("expanded"); }
+    el.mst.onclick = toggleSheet;
+    el.msh.onclick = toggleSheet;
+    let tY = 0;
+    el.msh.ontouchstart = e => { tY = e.touches[0].clientY; el.ms.style.transition = "none"; };
+    el.msh.ontouchmove = e => {
+      const dy = e.touches[0].clientY - tY;
+      const h = el.ms.offsetHeight - 160;
+      let t = el.ms.classList.contains("expanded") ? Math.max(0, dy) : Math.max(0, h + dy);
+      el.ms.style.transform = "translateY(" + Math.min(t, h) + "px)";
+    };
+    el.msh.ontouchend = e => {
+      el.ms.style.transition = ""; el.ms.style.transform = "";
+      const dy = e.changedTouches[0].clientY - tY;
+      if (Math.abs(dy) > 50) { if (dy > 0) el.ms.classList.remove("expanded"); else el.ms.classList.add("expanded"); }
+    };
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+}();
+</script>
+<script src="/js/cart.js"></script>
+</body>
+</html>
