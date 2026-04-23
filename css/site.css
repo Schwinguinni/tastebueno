@@ -866,17 +866,26 @@ input, textarea, select { font-family: var(--font-body); }
   border-bottom: 1px solid var(--border);
 }
 .filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
   padding: .5rem 1.125rem;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   background: var(--white);
-  font-size: .875rem;
-  font-weight: 500;
+  color: var(--text);
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: all var(--transition);
 }
-.filter-btn:hover { border-color: var(--text); }
+.filter-btn svg { flex-shrink: 0; opacity: .6; transition: opacity var(--transition); }
+.filter-btn:hover { border-color: var(--text); background: var(--bg-alt); }
+.filter-btn:hover svg { opacity: 1; }
 .filter-btn.active { background: var(--text); color: var(--white); border-color: var(--text); }
+.filter-btn.active svg { opacity: 1; stroke: var(--white); }
 
 /* ─── Product Detail Page ────────────────────────────── */
 .product-detail-grid {
