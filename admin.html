@@ -283,7 +283,19 @@
     .toast-msg.show { opacity: 1; transform: none; }
     .toast-msg.success { background: var(--green); }
     .toast-msg.error { background: var(--red); }
+    /* Analytics */
+    .admin-tab-btn { background:none; border:1px solid rgba(255,255,255,.2); color:rgba(255,255,255,.7); padding:.35rem .85rem; border-radius:6px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .15s; }
+    .admin-tab-btn:hover { border-color:rgba(255,255,255,.5); color:#fff; }
+    .admin-tab-btn.active { background:#DC2626; border-color:#DC2626; color:#fff; }
+    .analytics-card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:10px; padding:1.25rem; }
+    .analytics-num { font-size:2rem; font-weight:700; color:#fff; line-height:1; }
+    .analytics-label { font-size:.75rem; color:rgba(255,255,255,.4); margin-top:.25rem; text-transform:uppercase; letter-spacing:.05em; }
+    .analytics-row { display:flex; justify-content:space-between; align-items:center; padding:.25rem 0; border-bottom:1px solid #2a2a2a; }
+    .analytics-row:last-child { border-bottom:none; }
+    .analytics-bar { height:4px; background:#DC2626; border-radius:2px; margin-top:.2rem; }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -303,12 +315,15 @@
   <nav class="admin-nav">
     <div class="admin-nav-logo"><img src="/images/logo-dark-bg.png" alt="TasteBueno" height="32"> <span style="font-family:var(--font-body);font-size:.875rem;color:rgba(255,255,255,.5);font-weight:400">Admin</span></div>
     <div class="admin-nav-right">
+      <button class="admin-tab-btn active" onclick="switchTab('products')">Products</button>
+      <button class="admin-tab-btn" onclick="switchTab('analytics')">Analytics</button>
       <a href="/">View Site</a>
       <button class="btn-logout" onclick="logout()">Sign Out</button>
     </div>
   </nav>
 
-  <div class="admin-body">
+  <!-- Products Panel -->
+  <div class="admin-body" id="panel-products">
     <div class="admin-toolbar">
       <div>
         <h1>Products</h1>
@@ -319,11 +334,50 @@
         <button class="btn btn-outline" onclick="saveAll()">Save All</button>
       </div>
     </div>
-
     <div class="product-list" id="productList"></div>
+    <div class="add-product-card" onclick="openModal()">+ Add another product</div>
+  </div>
 
-    <div class="add-product-card" onclick="openModal()">
-      + Add another product
+  <!-- Analytics Panel -->
+  <div class="admin-body" id="panel-analytics" style="display:none">
+    <div class="admin-toolbar">
+      <div><h1>Analytics</h1></div>
+      <button class="btn btn-outline" onclick="loadAnalytics()">↻ Refresh</button>
+    </div>
+
+    <!-- Stat cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem">
+      <div class="analytics-card"><div class="analytics-num" id="stat-total">—</div><div class="analytics-label">Total Visits</div></div>
+      <div class="analytics-card"><div class="analytics-num" id="stat-today">—</div><div class="analytics-label">Last 24h</div></div>
+      <div class="analytics-card"><div class="analytics-num" id="stat-active">—</div><div class="analytics-label">Active (5 min)</div></div>
+      <div class="analytics-card"><div class="analytics-num" id="stat-countries">—</div><div class="analytics-label">Countries</div></div>
+    </div>
+
+    <!-- Map + sidebar -->
+    <div style="display:grid;grid-template-columns:1fr 280px;gap:1rem;margin-bottom:1.5rem">
+      <div class="analytics-card" style="padding:0;overflow:hidden;min-height:320px">
+        <div id="analytics-map" style="height:320px;width:100%;background:#0d0d0d"></div>
+      </div>
+      <div class="analytics-card" style="display:flex;flex-direction:column;gap:.5rem">
+        <div style="font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.25rem">Top Countries</div>
+        <div id="countries-list" style="font-size:.82rem;display:flex;flex-direction:column;gap:.375rem"></div>
+      </div>
+    </div>
+
+    <!-- Pages + Recent + Referrers -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+      <div class="analytics-card">
+        <div style="font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.75rem">Top Pages</div>
+        <div id="pages-list" style="font-size:.82rem;display:flex;flex-direction:column;gap:.375rem"></div>
+      </div>
+      <div class="analytics-card">
+        <div style="font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.75rem">Referrers</div>
+        <div id="referrers-list" style="font-size:.82rem;display:flex;flex-direction:column;gap:.375rem"></div>
+      </div>
+      <div class="analytics-card">
+        <div style="font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.75rem">Recent Visitors</div>
+        <div id="recent-list" style="font-size:.82rem;display:flex;flex-direction:column;gap:.5rem;max-height:240px;overflow-y:auto"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -701,6 +755,96 @@ function showToast(msg, type = '') {
   el.className = 'toast-msg show ' + type;
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ── Analytics ─────────────────────────────────────────── */
+function switchTab(tab) {
+  document.getElementById('panel-products').style.display = tab === 'products' ? '' : 'none';
+  document.getElementById('panel-analytics').style.display = tab === 'analytics' ? '' : 'none';
+  document.querySelectorAll('.admin-tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'products') || (i === 1 && tab === 'analytics'));
+  });
+  if (tab === 'analytics') loadAnalytics();
+}
+
+let analyticsMap = null;
+let analyticsMarkers = [];
+
+function initMap() {
+  if (analyticsMap) return;
+  analyticsMap = L.map('analytics-map', { zoomControl: true, scrollWheelZoom: false }).setView([20, 0], 2);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© CartoDB',
+    maxZoom: 18
+  }).addTo(analyticsMap);
+}
+
+async function loadAnalytics() {
+  const pw = sessionStorage.getItem('adminPassword');
+  if (!pw) return;
+
+  initMap();
+
+  try {
+    const res = await fetch('/api/analytics-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    if (!res.ok) return;
+    const d = await res.json();
+
+    document.getElementById('stat-total').textContent = d.total.toLocaleString();
+    document.getElementById('stat-today').textContent = d.today.toLocaleString();
+    document.getElementById('stat-active').textContent = d.active.toLocaleString();
+    document.getElementById('stat-countries').textContent = d.countries.length;
+
+    // Map markers
+    analyticsMarkers.forEach(m => analyticsMap.removeLayer(m));
+    analyticsMarkers = [];
+    d.mapPoints.forEach(v => {
+      if (!v.lat || !v.lon) return;
+      const m = L.circleMarker([v.lat, v.lon], {
+        radius: 5, fillColor: '#DC2626', color: '#fff', weight: 1, fillOpacity: 0.85
+      }).addTo(analyticsMap);
+      m.bindPopup(`<b>${v.city || 'Unknown'}</b><br>${v.country || ''}<br><span style="opacity:.6;font-size:11px">${v.page}</span>`);
+      analyticsMarkers.push(m);
+    });
+
+    // Countries
+    const maxC = d.countries[0]?.[1] || 1;
+    document.getElementById('countries-list').innerHTML = d.countries.map(([c, n]) => `
+      <div>
+        <div class="analytics-row"><span>${c}</span><span style="color:rgba(255,255,255,.5)">${n}</span></div>
+        <div class="analytics-bar" style="width:${Math.round(n/maxC*100)}%"></div>
+      </div>`).join('');
+
+    // Pages
+    const maxP = d.pages[0]?.[1] || 1;
+    document.getElementById('pages-list').innerHTML = d.pages.map(([p, n]) => `
+      <div>
+        <div class="analytics-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">${p}</span><span style="color:rgba(255,255,255,.5)">${n}</span></div>
+        <div class="analytics-bar" style="width:${Math.round(n/maxP*100)}%"></div>
+      </div>`).join('');
+
+    // Referrers
+    document.getElementById('referrers-list').innerHTML = d.referrers.length
+      ? d.referrers.map(([r, n]) => `<div class="analytics-row"><span>${r}</span><span style="color:rgba(255,255,255,.5)">${n}</span></div>`).join('')
+      : '<div style="color:rgba(255,255,255,.3)">No referrers yet</div>';
+
+    // Recent
+    document.getElementById('recent-list').innerHTML = d.recent.slice(0, 20).map(v => `
+      <div style="padding:.375rem 0;border-bottom:1px solid #2a2a2a">
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:rgba(255,255,255,.9)">${v.city || 'Unknown'}, ${v.countryCode || '?'}</span>
+          <span style="color:rgba(255,255,255,.3);font-size:.75rem">${new Date(v.ts).toLocaleTimeString()}</span>
+        </div>
+        <div style="color:rgba(255,255,255,.4);font-size:.75rem">${v.page}</div>
+      </div>`).join('');
+
+  } catch (err) {
+    console.error('loadAnalytics:', err);
+  }
 }
 </script>
 </body>

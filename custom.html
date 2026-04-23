@@ -720,5 +720,6 @@ window.CLOUDINARY_UPLOAD_PRESET = 'REPLACE_WITH_YOUR_UPLOAD_PRESET';
 }();
 </script>
 <script src="/js/cart.js"></script>
+<script>fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({page:location.pathname,ref:document.referrer})});</script>
 </body>
 </html>

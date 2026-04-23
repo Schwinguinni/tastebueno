@@ -34,5 +34,6 @@
   // Clear cart on successful order
   localStorage.removeItem('tb_cart');
 </script>
+<script>fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({page:location.pathname,ref:document.referrer})});</script>
 </body>
 </html>
