@@ -132,13 +132,11 @@ input, textarea, select { font-family: var(--font-body); }
   width: 100%;
 }
 .nav-logo {
-  font-family: var(--font-head);
-  font-size: 1.75rem;
-  letter-spacing: .06em;
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
   line-height: 1;
 }
-.nav-logo span { color: var(--red); }
+.nav-logo img { display: block; width: auto; }
 .nav-links {
   display: flex;
   gap: 2rem;
